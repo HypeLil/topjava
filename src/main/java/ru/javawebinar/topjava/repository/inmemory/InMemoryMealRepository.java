@@ -5,42 +5,58 @@ import ru.javawebinar.topjava.repository.MealRepository;
 import ru.javawebinar.topjava.util.MealsUtil;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class InMemoryMealRepository implements MealRepository {
-    private final Map<Integer, Meal> repository = new ConcurrentHashMap<>();
+    private final CopyOnWriteArrayList<Meal> repository = new CopyOnWriteArrayList();
     private final AtomicInteger counter = new AtomicInteger(0);
 
     {
-        MealsUtil.meals.forEach(this::save);
+        MealsUtil.meals.forEach(m -> {
+            save(m, m.getUserId());
+        });
     }
 
     @Override
-    public Meal save(Meal meal) {
+    public Meal save(Meal meal, int userId) {
+        if (meal.getUserId() != userId) {
+           return null;
+        }
         if (meal.isNew()) {
             meal.setId(counter.incrementAndGet());
-            repository.put(meal.getId(), meal);
+            repository.add(meal);
             return meal;
         }
         // handle case: update, but not present in storage
-        return repository.computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
+        return meal;
     }
 
     @Override
-    public boolean delete(int id) {
+    public boolean delete(int id, int userId) {
+        if (repository.get(id).getUserId() != userId){
+            return false;
+        }
         return repository.remove(id) != null;
     }
 
     @Override
-    public Meal get(int id) {
+    public Meal get(int id, int userId) {
+        if (repository.get(id).getUserId() != userId) {
+        return null;
+        }
         return repository.get(id);
     }
 
     @Override
     public Collection<Meal> getAll() {
-        return repository.values();
+        repository.sort(Comparator.comparing(Meal::getDate));
+        Collections.reverse(repository);
+        return repository;
     }
 }
 
