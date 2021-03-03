@@ -8,11 +8,13 @@ import ru.javawebinar.topjava.repository.UserRepository;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Repository
 public class InMemoryUserRepository implements UserRepository {
     private static final Logger log = LoggerFactory.getLogger(InMemoryUserRepository.class);
     private final Map<Integer, User> repository = new ConcurrentHashMap<>();
+    private final AtomicInteger counter = new AtomicInteger(0);
 
     @Override
     public boolean delete(int id) {
@@ -23,6 +25,11 @@ public class InMemoryUserRepository implements UserRepository {
     @Override
     public User save(User user) {
         log.info("save {}", user);
+        if (user.isNew()){
+            user.setId(counter.incrementAndGet());
+            repository.put(counter.get(), user);
+            return user;
+        }
         repository.put(user.getId(), user);
         return user;
     }

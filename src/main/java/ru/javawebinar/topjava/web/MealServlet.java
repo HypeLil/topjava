@@ -31,10 +31,13 @@ public class MealServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         String id = request.getParameter("id");
 
-        Meal meal = new Meal(id.isEmpty() ? null : Integer.valueOf(id),
-                LocalDateTime.parse(request.getParameter("dateTime")),
-                request.getParameter("description"),
-                Integer.parseInt(request.getParameter("calories")));
+            Meal meal = new Meal(
+                    LocalDateTime.parse(request.getParameter("dateTime")),
+                    request.getParameter("description"),
+                    Integer.parseInt(request.getParameter("calories")));
+        if (!id.equals("")){
+            meal.setId(Integer.parseInt(id));
+        }
 
         log.info(meal.isNew() ? "Create {}" : "Update {}", meal);
         repository.save(meal, SecurityUtil.authUserId());
@@ -57,7 +60,11 @@ public class MealServlet extends HttpServlet {
                 final Meal meal = "create".equals(action) ?
                         new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000) :
                         repository.get(getId(request), SecurityUtil.authUserId());
-                request.setAttribute("meal", meal);
+                repository.save(meal, SecurityUtil.authUserId());
+                int mealId = meal.getId();
+                request.setAttribute("meal",
+                       MealsUtil.getTos(repository.getAll(), MealsUtil.DEFAULT_CALORIES_PER_DAY).stream().filter(
+                               m -> m.getId() == mealId).findFirst());
                 request.getRequestDispatcher("/mealForm.jsp").forward(request, response);
                 break;
             case "all":
