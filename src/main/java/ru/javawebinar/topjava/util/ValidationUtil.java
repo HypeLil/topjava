@@ -11,8 +11,17 @@ public class ValidationUtil {
         return object;
     }
 
+    public static <T> T checkNotFoundWithIdAndOwnByUserId(T object, int id, int userId) {
+        checkNotFoundMeal(object != null, "id="+id, userId);
+        return object;
+    }
+
     public static void checkNotFoundWithId(boolean found, int id) {
         checkNotFound(found, "id=" + id);
+    }
+
+    public static void checkNotFoundWithIdAndOwnByUserId(boolean found, int id, int userId) {
+        checkNotFoundMeal(found, "id=" + id, userId);
     }
 
     public static <T> T checkNotFound(T object, String msg) {
@@ -23,6 +32,12 @@ public class ValidationUtil {
     public static void checkNotFound(boolean found, String msg) {
         if (!found) {
             throw new NotFoundException("Not found entity with " + msg);
+        }
+    }
+
+    public static void checkNotFoundMeal(boolean found, String msg, int userId) {
+        if (!found) {
+            throw new NotFoundException("Not found entity with " + msg + " or this user with Id " + userId + " haven`t access");
         }
     }
 
