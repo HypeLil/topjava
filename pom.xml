@@ -134,6 +134,7 @@
             <version>${assertj.version}</version>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.hamcrest/hamcrest-all -->
     </dependencies>
 
     <profiles>

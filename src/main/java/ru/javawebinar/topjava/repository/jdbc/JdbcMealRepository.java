@@ -63,7 +63,7 @@ public class JdbcMealRepository implements MealRepository {
 
     @Override
     public Meal get(int id, int userId) {
-        List<Meal> meals = jdbcTemplate.query("SELECT * FROM meals WHERE id:? and user_id=?",
+        List<Meal> meals = jdbcTemplate.query("SELECT * FROM meals WHERE id=? and user_id=?",
                 ROW_MAPPER, id, userId);
         return DataAccessUtils.singleResult(meals);
     }
